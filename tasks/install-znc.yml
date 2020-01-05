@@ -1,0 +1,44 @@
+---
+- name: Install ZNC IRC Bouncer
+  package:
+    name: znc
+    state: present
+- block:
+    # znc user and group are not created like other packages for znc
+    # https://wiki.znc.in/Running_ZNC_as_a_system_daemon
+    - name: Create ZNC group
+      group:
+        name: znc
+        system: yes
+    - name: Create ZNC user
+      user:
+        name: znc
+        comment: Account to run ZNC daemon
+        group: znc
+        system: yes
+        shell: /sbin/nologin
+        home: /var/lib/znc
+        create_home: yes
+    # cannot run command as znc
+    # https://github.com/ansible/ansible/issues/16052
+    # just prompt instead for now
+    - name: Run Initial configuration
+      debug:
+        msg: Run the following command \"sudo -u znc /usr/bin/znc --datadir=/var/lib/znc --makeconf\"
+    - name: Create systemd script
+      copy:
+        src: znc.service
+        dest: /etc/systemd/system/znc.service
+      notify:
+        - Reload systemd
+    - name: Check config exists
+      stat:
+        path: /var/lib/znc/configs/znc.conf
+      register: znc_conf
+    - name: Start ZNC
+      systemd:
+        name: znc
+        state: started
+      when: znc_conf.stat.exists == True
+  when:
+    - ansible_facts['os_family'] == "Debian"

@@ -1,0 +1,33 @@
+---
+- block:
+    - name: Install firewall
+      package:
+        name: ufw
+        state: present
+    - name: Start firewall
+      systemd:
+        name: ufw
+        state: started
+    - name: Open IRC Port Unencrypted
+      ufw:
+        rule: allow
+        to_port: '6667'
+        proto: tcp
+      notify:
+        - Reload Firewall
+    - name: Open IRC Port Encrypted
+      ufw:
+        to_port: '6697'
+        proto: tcp
+        rule: allow
+      notify:
+        - Reload Firewall
+    - name: Open Port for ZNC webadmin
+      ufw:
+        to_port: '8080'
+        proto: tcp
+        rule: allow
+      notify:
+        - Reload Firewall
+  when:
+    - ansible_facts['os_family'] == "Debian"

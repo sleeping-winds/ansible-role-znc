@@ -1,0 +1,13 @@
+---
+galaxy_info:
+  role_name: znc
+  author: John Losito
+  description: Installs and configures the ZNC irc bouncer.
+  company: Losito
+  license: BSD
+  min_ansible_version: 2.4
+  platforms:
+    - name: Ubuntu
+      version: 16.04
+  galaxy_tags: []
+dependencies: []
